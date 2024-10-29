@@ -1,48 +1,59 @@
-//your JS code here. If required.
 // Function to create a promise that resolves after a random time between 1 and 3 seconds
 function createRandomPromise(promiseName) {
-    return new Promise((resolve) => {
-        const randomTime = Math.floor(Math.random() * 3) + 1; // Random time between 1 and 3 seconds
-        setTimeout(() => {
-            resolve({ name: promiseName, time: randomTime });
-        }, randomTime * 1000);
-    });
+  return new Promise((resolve) => {
+    const timeToResolve = Math.floor(Math.random() * 3) + 1; // Random time between 1 and 3 seconds
+    setTimeout(() => {
+      resolve({ name: promiseName, time: timeToResolve });
+    }, timeToResolve * 1000);
+  });
 }
 
-// Create an array of promises
+// Create three promises
 const promises = [
-    createRandomPromise('Promise 1'),
-    createRandomPromise('Promise 2'),
-    createRandomPromise('Promise 3'),
+  createRandomPromise("Promise 1"),
+  createRandomPromise("Promise 2"),
+  createRandomPromise("Promise 3"),
 ];
 
-// Insert loading text into the table
-const output = document.getElementById('output');
-const loadingRow = document.createElement('tr');
-loadingRow.innerHTML = '<td colspan="2">Loading...</td>';
-output.appendChild(loadingRow);
+// Function to populate the table
+function populateTable(results, totalTime) {
+  const output = document.getElementById("output");
+  output.innerHTML = ""; // Clear previous content
+
+  results.forEach(result => {
+    const row = document.createElement("tr");
+    const cell1 = document.createElement("td");
+    const cell2 = document.createElement("td");
+
+    cell1.textContent = result.name;
+    cell2.textContent = result.time;
+
+    row.appendChild(cell1);
+    row.appendChild(cell2);
+    output.appendChild(row);
+  });
+
+  // Add the total row
+  const totalRow = document.createElement("tr");
+  const totalCell1 = document.createElement("td");
+  const totalCell2 = document.createElement("td");
+
+  totalCell1.textContent = "Total";
+  totalCell2.textContent = totalTime.toFixed(3); // Format to three decimal places
+
+  totalRow.appendChild(totalCell1);
+  totalRow.appendChild(totalCell2);
+  output.appendChild(totalRow);
+}
+
+// Show loading text while promises are resolving
+document.getElementById("output").innerHTML = "<tr><td colspan='2'>Loading...</td></tr>";
 
 // Use Promise.all to wait for all promises to resolve
-Promise.all(promises)
-    .then((results) => {
-        // Remove loading text
-        output.removeChild(loadingRow);
+Promise.all(promises).then((results) => {
+  // Calculate total time taken
+  const totalTime = results.reduce((acc, curr) => acc + curr.time, 0);
 
-        // Calculate total time taken
-        const totalTime = results.reduce((acc, result) => acc + result.time, 0);
-
-        // Populate the table with results
-        results.forEach((result) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${result.name}</td><td>${result.time}</td>`;
-            output.appendChild(row);
-        });
-
-        // Add the total time row
-        const totalRow = document.createElement('tr');
-        totalRow.innerHTML = `<td>Total</td><td>${totalTime.toFixed(3)}</td>`; // Fixed to 3 decimal places
-        output.appendChild(totalRow);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+  // Populate the table with results
+  populateTable(results, totalTime);
+});
